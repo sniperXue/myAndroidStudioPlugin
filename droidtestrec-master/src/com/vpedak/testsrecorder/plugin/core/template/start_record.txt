@@ -1,0 +1,86 @@
+package {PACKAGE};
+
+import com.vpedak.testsrecorder.core.ActivityListener;
+import android.app.Activity;
+import android.app.Instrumentation;
+import android.content.IntentFilter;
+import android.test.ActivityInstrumentationTestCase2;
+import android.test.suitebuilder.annotation.LargeTest;
+import android.util.Log;
+
+import android.support.test.InstrumentationRegistry;
+import android.support.test.rule.ActivityTestRule;
+import android.support.test.runner.AndroidJUnit4;
+import android.test.ActivityInstrumentationTestCase2;
+import android.widget.Button;
+import android.widget.EditText;
+import android.widget.TextView;
+import com.robotium.solo.Solo;
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Rule;
+import org.junit.Test;
+import org.junit.runner.RunWith;
+import static org.junit.Assert.assertEquals;
+
+@LargeTest
+public class {CLASSNAME} extends ActivityInstrumentationTestCase2<{ACTIVITY}> {
+    public {CLASSNAME}() {
+       super({ACTIVITY}.class);
+       //Log.e("MyCons", "Cons");
+    }
+    private Solo solo;
+    private Activity activity;
+    //boolean firstSetup = true;
+    ActivityListener al;
+
+    @Override
+    public void setUp() throws Exception {
+        super.setUp();
+        solo = new Solo(getInstrumentation());
+        activity = getActivity();
+	    //Log.e("MySetUP", new Boolean(firstSetup).toString());
+        //if(firstSetup == true){
+          al = new ActivityListener(getInstrumentation(), activity, {ID}L);
+          al.start();
+          //firstSetup = false;
+        //}
+    }
+
+    public void testRun1() throws InterruptedException {
+
+
+        Button button1 = (Button) solo.getView(R.id.bn);
+
+        solo.clickOnView(button1);
+        solo.sleep(4000);
+       // Thread.sleep(24*60*60*1000);
+    }
+    public void testRun2() throws InterruptedException {
+
+
+            Button button2 = (Button) solo.getView(R.id.bn);
+            Button button3 = (Button) solo.getView(R.id.bn);
+            Button button4 = (Button) solo.getView(R.id.bn);
+            solo.clickOnView(button2);
+            solo.sleep(2000);
+            solo.clickOnView(button3);
+            solo.sleep(2000);
+            solo.clickOnView(button4);
+            solo.sleep(2000);
+            //Thread.sleep(24*60*60*1000);
+        }
+
+     @Override
+     public void tearDown() throws Exception {
+        al.stop();
+        try {
+        //Robotium will finish all the activities that have been opened
+        solo.finalize();
+        } catch (Throwable e) {
+        e.printStackTrace();
+         }
+        getActivity().finish();
+        super.tearDown();
+     }
+}
