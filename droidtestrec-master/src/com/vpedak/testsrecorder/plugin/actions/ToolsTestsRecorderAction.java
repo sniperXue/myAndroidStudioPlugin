@@ -543,6 +543,7 @@ public class ToolsTestsRecorderAction extends com.intellij.openapi.actionSystem.
                                 ToolsTestsRecorderAction.template.replace("{ACTIVITY}", activityClass.getName()).replace("{PACKAGE}", packageName).
                                         replace("{CLASSNAME}", "AndrTestRec").replace("{ID}", String.valueOf(uniqueId)));
 
+
                         for(PsiElement child : psiDirectory.getChildren()) {
                             //和Android一样，Intellij Platform不允许直接在主线程进行实时的文件写入，需要通过一个异步任务进行。
                             WriteCommandAction.runWriteCommandAction(project, new Runnable() {
@@ -551,20 +552,39 @@ public class ToolsTestsRecorderAction extends com.intellij.openapi.actionSystem.
                                     PsiFile psiFile1 = myCreateFile(psiDirectory, child);
                                     ASTNode astNode = psiFile1.getNode();
                                     //ASTNode[] aa = astNode.getChildren(null);
-                                    ASTNode aa = NodePrinter(astNode);
-                                    Messages.showMessageDialog("aa is "+ aa.getElementType().toString() + aa.getText(), "Information", Messages.getInformationIcon());
-                                    JavaParserUtil.ParserWrapper myParser = new JavaParserUtil.ParserWrapper(){
-                                        @Override
-                                        public void parse(final PsiBuilder builder) {
-                                            //JavaParser.INSTANCE.getStatementParser().parseStatements(builder);
-                                            JavaParser.INSTANCE.getDeclarationParser().parseClassBodyDeclarations(builder,true);
-                                        }
-                                    };
-                                    //JavaParserUtil.createBuilder(aa);
-                                    Messages.showMessageDialog("myParser is"+ myParser.toString(), "Information", Messages.getInformationIcon());
-                                    ASTNode xx = JavaParserUtil.parseFragment(aa, myParser);
-                                    Messages.showMessageDialog("xx is"+ xx.getText(), "Information", Messages.getInformationIcon());
-                                    NodePrinter(xx);
+                                    ASTNode importListNode = findImportListAstNode(astNode);
+                                    Messages.showMessageDialog("importListNode is "+ importListNode.getElementType().toString() + importListNode.getText(), "Information", Messages.getInformationIcon());
+                                    ASTNode classParseNode = parseClassAstNode(astNode);
+//                                    Messages.showMessageDialog("======================1======================= ", "Information", Messages.getInformationIcon());
+//                                   NodePrinter(classParseNode);
+                                    ASTNode[] myNodes = NodePrinter001(classParseNode);
+                                    for (ASTNode asn:myNodes
+                                         ) {
+                                        Messages.showMessageDialog("methodNode  is "+ asn.getElementType().toString()+"====="+asn.getText(), "Information", Messages.getInformationIcon());
+                                    }
+//                                    Messages.showMessageDialog("======================2======================= ", "Information", Messages.getInformationIcon());
+//                                    ASTNode[] methodNodes = parseMethodAstNode(classParseNode);
+//                                    Messages.showMessageDialog("methodNodes's lenght is "+ methodNodes.length, "Information", Messages.getInformationIcon());
+//                                    for (ASTNode methodNode:methodNodes) {
+//                                        //NodePrinter001(methodNode);
+//                                        Messages.showMessageDialog("methodNode lenght is "+ methodNode.getElementType().toString()+"====="+methodNode.getText(), "Information", Messages.getInformationIcon());
+//                                    }
+//                                    ASTNode aa = NodePrinter(astNode);
+//                                    Messages.showMessageDialog("aa is "+ aa.getElementType().toString() + aa.getText(), "Information", Messages.getInformationIcon());
+//                                    JavaParserUtil.ParserWrapper myParser = new JavaParserUtil.ParserWrapper(){
+//                                        @Override
+//                                        public void parse(final PsiBuilder builder) {
+//                                            //JavaParser.INSTANCE.getStatementParser().parseStatements(builder);
+//                                            JavaParser.INSTANCE.getDeclarationParser().parseClassBodyDeclarations(builder,true);
+//                                        }
+//                                    };
+//                                    JavaParserUtil.createBuilder(aa);
+//                                    Messages.showMessageDialog("myParser is"+ myParser.toString(), "Information", Messages.getInformationIcon());
+//                                    ASTNode xx = JavaParserUtil.parseFragment(aa, myParser);
+//                                    Messages.showMessageDialog("xx is"+ xx.getText(), "Information", Messages.getInformationIcon());
+//                                    NodePrinter(xx);
+
+
                                     //PsiBuilder builder = JavaParserUtil.createBuilder(aa);
                                     //JavaParser.INSTANCE.getStatementParser().parseCodeBlockDeep(builder, true);
                                     //NodePrinter(builder.getTreeBuilt());
@@ -575,6 +595,17 @@ public class ToolsTestsRecorderAction extends com.intellij.openapi.actionSystem.
                                 }
                             });
                         }
+
+//                        for (PsiElement element: psiDirectory.getChildren()
+//                             ) {
+////                            String name = element.getClass().getName();
+////                            //打印的是：ClassName is :com.intellij.psi.impl.source.PsiJavaFileImpl
+////                            Messages.showMessageDialog("ClassName is :"+ name, "Information", Messages.getInformationIcon());
+////                           String getProjectName =  element.getProject().getName();
+////                            Messages.showMessageDialog("ClassName is :"+ getProjectName, "Information", Messages.getInformationIcon());
+//                            element.getNode().getElementType().toString();
+//                        }
+
 //                            new WriteCommandAction.Simple(project) {
 //                                    protected void run() throws Throwable {
 //                                        myCreateFile(psiDirectory, child);
@@ -655,18 +686,7 @@ public class ToolsTestsRecorderAction extends com.intellij.openapi.actionSystem.
         eventsList.clear(project, currentModule, psiFile);
     }
 
-    public ASTNode NodePrinter(ASTNode as){
-        String printstr = ""; int i=0;
-        ASTNode[] children = as.getChildren(null);
-        for(ASTNode aa:children) {
-            printstr += "Node"+i+" Type: "+ aa.getElementType().toString() + "\n";
-            printstr += "Node"+i+"Content:" + aa.getText()+ "\n";
-            i++;
-        }
-        Messages.showMessageDialog(printstr, "Information", Messages.getInformationIcon());
-        Messages.showMessageDialog("children[i-2] is " + (i-2) + children[i-2].getElementType().toString() + children[i-2].getText(), "Information", Messages.getInformationIcon());
-        return children[i-2];
-    }
+
 
     private Dependency findDepRecord(List<BuildFileStatement> dependencies) {
         //T10.class actionPerformed from ToolsTestsRecorderAction.java
@@ -717,6 +737,8 @@ public class ToolsTestsRecorderAction extends com.intellij.openapi.actionSystem.
         //return "/home/vpedak/IdeaProjects/droidtestrec/AndroidTestsRecorder.jar";
     }
 
+
+
     public void testStarted() {
         ApplicationManager.getApplication().invokeLater(new Runnable() {
             public void run() {
@@ -726,6 +748,154 @@ public class ToolsTestsRecorderAction extends com.intellij.openapi.actionSystem.
 
         eventReader.start(uniqueId);
     }
+
+
+//    public ASTNode parseContents(final ASTNode chameleon) {
+//        return JavaParserUtil.parseFragment(chameleon, myParser);
+//
+//    }
+
+    public ASTNode findImportListAstNode(ASTNode node1){
+        /**
+         * 这个ASTNode必须是第一层否则可能找不到Node[2]就是IMPORT_LIST
+         */
+        ASTNode[] children = node1.getChildren(null);
+        ASTNode resultNode = null;
+        for (ASTNode node2:children) {
+            if("IMPORT_LIST".equals(node2.getElementType().toString())) {
+                resultNode = node2;
+                break;
+            }
+        }
+        return resultNode;
+    }
+
+    public ASTNode parseClassAstNode(ASTNode node3) {
+        /**
+         * 因为一个测试用例只有一个类所以直接找到类然后解析
+         */
+        ASTNode resultNode = null;
+        for (ASTNode node4:node3.getChildren(null)) {
+            if("CLASS".equals(node4.getElementType().toString())){
+                JavaParserUtil.ParserWrapper myClassParser = new JavaParserUtil.ParserWrapper(){
+                    @Override
+                    public void parse(final PsiBuilder builder) {
+                        //JavaParser.INSTANCE.getStatementParser().parseStatements(builder);
+                        JavaParser.INSTANCE.getDeclarationParser().parseClassBodyDeclarations(builder,true);
+//                        JavaParser.INSTANCE.getStatementParser().parseStatement(builder);
+                    }
+                };
+
+                JavaParserUtil.createBuilder(node4);
+                resultNode = JavaParserUtil.parseFragment(node4, myClassParser);
+
+            }
+        }
+        return resultNode;
+    }
+
+    public ASTNode findIdentifierAstNode(ASTNode node5){
+        /**
+         * ASTNode必须是CLASS类型的否则可能没有而报错
+         * 得到的是为了改类名用的
+         */
+        ASTNode resultNode = null;
+        for (ASTNode node6:node5.getChildren(null)) {
+            if ("IDENTIFIER".equals(node6.getElementType().toString())) {
+                resultNode = node6;
+            }
+        }
+        return resultNode;
+    }
+
+    public ASTNode[] parseMethodAstNode(ASTNode node7){
+        /**
+         * 传进来的ASTNode必须是CLASS类型的
+         * 把所有的ASTNode类型是METHOD的都搜索到然后解析每一个，并把解析好的树的根节点保存到resultNodes数组中去
+         */
+        ASTNode[] resultNodes = null;
+        int i = 0;
+        for (ASTNode node8:node7.getChildren(null)) {
+            if("METHOD".equals(node8.getElementType().toString())){
+                JavaParserUtil.ParserWrapper myMethodParser = new JavaParserUtil.ParserWrapper(){
+                    @Override
+                    public void parse(final PsiBuilder builder) {
+                        JavaParser.INSTANCE.getStatementParser().parseStatements(builder);
+                        //JavaParser.INSTANCE.getDeclarationParser().parseClassBodyDeclarations(builder,true);
+//                        JavaParser.INSTANCE.getDeclarationParser().parse(builder, DeclarationParser.Context.CODE_BLOCK);
+                    }
+                };
+
+                JavaParserUtil.createBuilder(node8);
+                resultNodes[i] = node8;
+                i++;
+            }
+        }
+        return resultNodes;
+    }
+//    public ASTNode findLbraceAstNode(ASTNode node5){
+//        ASTNode resultNode = null;
+//
+//        return resultNode;
+//    }
+//    public ASTNode findLbraceAstNode(ASTNode node5){
+//        ASTNode resultNode = null;
+//
+//        return resultNode;
+//    }
+    public ASTNode NodePrinter(ASTNode as){
+        String printstr = ""; int i=0;
+        ASTNode[] children = as.getChildren(null);
+        for(ASTNode aa:children) {
+            printstr += "Node"+i+" Type: "+ aa.getElementType().toString() + "\n";
+            printstr += "Node"+i+"Content:" + aa.getText()+ "\n";
+            i++;
+        }
+        Messages.showMessageDialog(printstr, "Information", Messages.getInformationIcon());
+        Messages.showMessageDialog("children[i-2] is " + (i-2) + children[i-2].getElementType().toString() + children[i-2].getText(), "Information", Messages.getInformationIcon());
+        return children[i-2];
+    }
+
+    public ASTNode[] NodePrinter001(ASTNode as){
+        /**
+         * 输入的还是CLASS节点，把所有的Type是METHOD的方式的保存到一起
+         */
+        String printstr = ""; int i=0;
+        ASTNode[] children = as.getChildren(null);
+        //先把所有TYPE为METHOD的个数统计出来
+        for(ASTNode aa:children) {
+            if("METHOD".equals(aa.getElementType().toString())) {
+                i++;
+
+            }
+        }
+        ASTNode[] re = new ASTNode[i];
+        int j=0;
+        for(ASTNode aa:children) {
+            if("METHOD".equals(aa.getElementType().toString())) {
+                printstr += "Node" + j + " Type: " + aa.getElementType().toString() + "\n";
+                printstr += "Node" + j + "Content:" + aa.getText() + "\n";
+                re[j] = aa;
+                j++;
+
+            }
+        }
+        //Messages.showMessageDialog(printstr, "Information", Messages.getInformationIcon());
+        //Messages.showMessageDialog("children[i-2] is " + (i-2) + children[i-2].getElementType().toString() + children[i-2].getText(), "Information", Messages.getInformationIcon());
+        return re;
+    }
+//    public ASTNode NodePrinter002(ASTNode as){
+//        String printstr = ""; int i=0;
+//        ASTNode[] children = as.getChildren(null);
+//        for(ASTNode aa:children) {
+//            printstr += "Node"+i+" Type: "+ aa.getElementType().toString() + "\n";
+//            printstr += "Node"+i+"Content:" + aa.getText()+ "\n";
+//            i++;
+//        }
+//        Messages.showMessageDialog(printstr, "Information", Messages.getInformationIcon());
+//        //Messages.showMessageDialog("children[i-2] is " + (i-2) + children[i-2].getElementType().toString() + children[i-2].getText(), "Information", Messages.getInformationIcon());
+//        return children[0];
+//    }
 
     public static PsiFile myCreateFile(PsiDirectory directory,
                                        PsiElement psiElement) {

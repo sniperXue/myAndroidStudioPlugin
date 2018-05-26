@@ -31,10 +31,10 @@ public class {CLASSNAME} extends ActivityInstrumentationTestCase2<{ACTIVITY}> {
     }
     private Solo solo;
     private Activity activity;
-    //boolean firstSetup = true;
-    ActivityListener al;
+                 //boolean firstSetup = true;
+                 ActivityListener al;
 
-    @Override
+                 @Override
     public void setUp() throws Exception {
         super.setUp();
         solo = new Solo(getInstrumentation());
