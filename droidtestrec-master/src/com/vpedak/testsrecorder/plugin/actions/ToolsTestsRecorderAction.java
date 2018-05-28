@@ -553,15 +553,23 @@ public class ToolsTestsRecorderAction extends com.intellij.openapi.actionSystem.
                                     ASTNode astNode = psiFile1.getNode();
                                     //ASTNode[] aa = astNode.getChildren(null);
                                     ASTNode importListNode = findImportListAstNode(astNode);
-                                    Messages.showMessageDialog("importListNode is "+ importListNode.getElementType().toString() + importListNode.getText(), "Information", Messages.getInformationIcon());
+                                    Messages.showMessageDialog("importListNode is "+ importListNode.getElementType().toString() + "\ncontent:\n" + importListNode.getText(), "Information", Messages.getInformationIcon());
                                     ASTNode classParseNode = parseClassAstNode(astNode);
+                                    ASTNode identifierNode = findIdentifierAstNode(classParseNode);
+                                    Messages.showMessageDialog("identifierNode is "+ identifierNode.getElementType().toString() + "\ncontent:\n" + identifierNode.getText(), "Information", Messages.getInformationIcon());
+                                    ASTNode lBraceNode = findLbraceAstNode(classParseNode);
+                                    Messages.showMessageDialog("lBraceNode is "+ lBraceNode.getElementType().toString() + "\ncontent:\n" + lBraceNode.getText(), "Information", Messages.getInformationIcon());
+                                    ASTNode rBraceNode = findBbraceAstNode(classParseNode);
+                                    Messages.showMessageDialog("rBraceNode is "+ rBraceNode.getElementType().toString() + "\ncontent:\n" + rBraceNode.getText(), "Information", Messages.getInformationIcon());
 //                                    Messages.showMessageDialog("======================1======================= ", "Information", Messages.getInformationIcon());
 //                                   NodePrinter(classParseNode);
                                     ASTNode[] myNodes = NodePrinter001(classParseNode);
-                                    for (ASTNode asn:myNodes
-                                         ) {
-                                        Messages.showMessageDialog("methodNode  is "+ asn.getElementType().toString()+"====="+asn.getText(), "Information", Messages.getInformationIcon());
-                                    }
+//                                    for (ASTNode asn:myNodes
+//                                         ) {
+//                                        Messages.showMessageDialog("methodNode  is "+ asn.getElementType().toString()+"====="+asn.getText(), "Information", Messages.getInformationIcon());
+//                                        ASTNode bb = parseContent(asn);
+//                                        Messages.showMessageDialog("bb  is "+ bb.getElementType().toString()+"\n"+asn.getTreeNext().getText(), "Information", Messages.getInformationIcon());
+//                                    }
 //                                    Messages.showMessageDialog("======================2======================= ", "Information", Messages.getInformationIcon());
 //                                    ASTNode[] methodNodes = parseMethodAstNode(classParseNode);
 //                                    Messages.showMessageDialog("methodNodes's lenght is "+ methodNodes.length, "Information", Messages.getInformationIcon());
@@ -808,6 +816,7 @@ public class ToolsTestsRecorderAction extends com.intellij.openapi.actionSystem.
         return resultNode;
     }
 
+    //方法解析不出来.....
     public ASTNode[] parseMethodAstNode(ASTNode node7){
         /**
          * 传进来的ASTNode必须是CLASS类型的
@@ -833,11 +842,34 @@ public class ToolsTestsRecorderAction extends com.intellij.openapi.actionSystem.
         }
         return resultNodes;
     }
-//    public ASTNode findLbraceAstNode(ASTNode node5){
-//        ASTNode resultNode = null;
-//
-//        return resultNode;
-//    }
+
+    public ASTNode findLbraceAstNode(ASTNode node7){
+        /**
+         * 输入的ASTNode还是解析好的类
+         * 输出的是类的第一个“{”
+         */
+        ASTNode resultNode = null;
+        for (ASTNode node8:node7.getChildren(null)) {
+            if ("LBRACE".equals(node8.getElementType().toString())) {
+                resultNode = node8;
+            }
+        }
+        return resultNode;
+    }
+
+    public ASTNode findBbraceAstNode(ASTNode node7){
+        /**
+         * 输入的ASTNode还是解析好的类
+         * 输出的是类的最后的那个"}"
+         */
+        ASTNode resultNode = null;
+        for (ASTNode node8:node7.getChildren(null)) {
+            if ("RBRACE".equals(node8.getElementType().toString())) {
+                resultNode = node8;
+            }
+        }
+        return resultNode;
+    }
 //    public ASTNode findLbraceAstNode(ASTNode node5){
 //        ASTNode resultNode = null;
 //
@@ -862,20 +894,28 @@ public class ToolsTestsRecorderAction extends com.intellij.openapi.actionSystem.
          */
         String printstr = ""; int i=0;
         ASTNode[] children = as.getChildren(null);
-        //先把所有TYPE为METHOD的个数统计出来
-        for(ASTNode aa:children) {
+
+        for(ASTNode aa:children) {  //先把所有TYPE为METHOD的个数统计出来
             if("METHOD".equals(aa.getElementType().toString())) {
                 i++;
 
             }
         }
         ASTNode[] re = new ASTNode[i];
+
         int j=0;
         for(ASTNode aa:children) {
             if("METHOD".equals(aa.getElementType().toString())) {
                 printstr += "Node" + j + " Type: " + aa.getElementType().toString() + "\n";
                 printstr += "Node" + j + "Content:" + aa.getText() + "\n";
                 re[j] = aa;
+//                String str = "";int k=0;
+//                for(ASTNode ak:aa.getChildren(null)) {
+//                    str += "akNode" + k + " Type: " + ak.getElementType().toString() + "\n";
+//                    str += "akNode" + k + "Content:" + ak.getText() + "\n";
+//                    k++;
+//                }
+//                ClassOrInterfaceDeclaration
                 j++;
 
             }
@@ -883,6 +923,31 @@ public class ToolsTestsRecorderAction extends com.intellij.openapi.actionSystem.
         //Messages.showMessageDialog(printstr, "Information", Messages.getInformationIcon());
         //Messages.showMessageDialog("children[i-2] is " + (i-2) + children[i-2].getElementType().toString() + children[i-2].getText(), "Information", Messages.getInformationIcon());
         return re;
+    }
+
+    public ASTNode parseContent(ASTNode rNode) {
+//        JavaParserUtil.ParserWrapper myClassParser = new JavaParserUtil.ParserWrapper(){
+//            @Override
+//            public void parse(final PsiBuilder builder) {
+//                //JavaParser.INSTANCE.getStatementParser().parseStatements(builder);
+//                JavaParser.INSTANCE.getDeclarationParser().parseClassBodyDeclarations(builder,true);
+////                        JavaParser.INSTANCE.getStatementParser().parseStatement(builder);
+//            }
+//        };
+
+//        PsiBuilder builder = JavaParserUtil.createBuilder(rNode);
+////        JavaParser.INSTANCE.getStatementParser().parseStatements(builder);
+//        JavaParser.INSTANCE.getStatementParser().parseCodeBlockDeep(builder, true);
+//        return builder.getTreeBuilt().getFirstChildNode();
+        JavaParserUtil.ParserWrapper myParser = new JavaParserUtil.ParserWrapper(){
+
+            @Override
+            public void parse(PsiBuilder psiBuilder) {
+                PsiBuilder builder = JavaParserUtil.createBuilder(rNode);
+                JavaParser.INSTANCE.getDeclarationParser().parseClassBodyDeclarations(builder,true);
+            }
+        };
+        return JavaParserUtil.parseFragment(rNode, myParser);
     }
 //    public ASTNode NodePrinter002(ASTNode as){
 //        String printstr = ""; int i=0;
