@@ -553,7 +553,26 @@ public class ToolsTestsRecorderAction extends com.intellij.openapi.actionSystem.
                                     ASTNode astNode = psiFile1.getNode();
                                     //ASTNode[] aa = astNode.getChildren(null);
                                     ASTNode importListNode = findImportListAstNode(astNode);
+                                    ASTNode tempImportListNode = importListNode.copyElement();
+//                                    ASTNode add = element.getNode().copyElement();
+//                                    if (lastArg == null) {
+//...
+//                                    } else {
+//                                        ASTNode lastArgNode = lastArg.getNode();
+//                                        ASTNode comma = createComma(project);
+//                                        ASTNode parent = lastArgNode.getTreeParent();
+//                                        ASTNode afterLast = lastArgNode.getTreeNext();
+//                                        if (afterLast == null) {
+//                                            parent.addChild(add);
+//                                        } else {
+//                                            parent.addChild(add, afterLast); // exception here
+//                                        }
+//                                        parent.addChild(comma, add);
+//                                    }
+//                                    ASTNode argNode = tempImportListNode.getNode().findChildByType(TSTypes.VAR_LIST);
                                     Messages.showMessageDialog("importListNode is "+ importListNode.getElementType().toString() + "\ncontent:\n" + importListNode.getText(), "Information", Messages.getInformationIcon());
+                                    Messages.showMessageDialog("tempImportListNode is "+ tempImportListNode.getElementType().toString() + "\ncontent:\n" + tempImportListNode.getText(), "Information", Messages.getInformationIcon());
+
                                     ASTNode classParseNode = parseClassAstNode(astNode);
                                     ASTNode identifierNode = findIdentifierAstNode(classParseNode);
                                     Messages.showMessageDialog("identifierNode is "+ identifierNode.getElementType().toString() + "\ncontent:\n" + identifierNode.getText(), "Information", Messages.getInformationIcon());
